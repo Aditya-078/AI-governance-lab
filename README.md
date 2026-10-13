@@ -1,4 +1,5 @@
 # AI-governance-lab
+
 # Enterprise AI Governance
 
 > An open research project exploring enterprise AI governance, compliance automation, and runtime policy enforcement for AI systems.
@@ -7,193 +8,243 @@
 
 As organizations increasingly adopt AI assistants, LLM-powered applications, and autonomous AI agents, new challenges emerge around governance, compliance, security, and auditability.
 
-Traditional security mechanisms such as IAM, API gateways, and network firewalls were designed for human users and service-to-service communication—not autonomous AI systems capable of making decisions and interacting with enterprise resources.
+This project explores architectural approaches for governing enterprise AI systems, beginning with document-based compliance analysis and gradually expanding toward a broader AI governance platform.
 
-This repository is a long-term research project that explores architectural approaches for governing enterprise AI systems.
-
-The project is intentionally built incrementally, with each module solving a specific enterprise problem before expanding into a broader governance platform.
+The project is built incrementally, with each module addressing a specific enterprise problem before expanding into a larger system.
 
 ---
 
-# Current Phase
-
-## AI Compliance Engine
+## Current Phase: AI Compliance Engine
 
 The first module focuses on assisting compliance teams with one specific workflow:
 
-> **Automatically identifying compliance gaps between regulatory documents and internal company policies.**
+**Identifying compliance gaps between regulatory documents and internal company policies.**
 
-Instead of attempting to automate the entire compliance lifecycle, the current objective is to reduce manual document analysis through AI-assisted obligation extraction and policy comparison.
+The goal is to reduce manual document analysis through AI-assisted obligation extraction, policy comparison, and explainable reporting, while keeping final compliance decisions with human reviewers.
 
----
+## Problem Statement
 
-# Problem Statement
-
-Compliance professionals spend significant time performing repetitive document-centric tasks such as:
+Compliance professionals spend significant time:
 
 - Reading lengthy regulatory documents
 - Identifying applicable obligations
 - Comparing regulations with internal policies
 - Detecting missing controls
-- Preparing audit evidence
-- Producing compliance reports
+- Preparing audit evidence and compliance reports
 
-These activities are largely manual, time-consuming, and difficult to scale as regulations evolve.
+This project investigates how LLMs and retrieval techniques can assist with these tasks while maintaining transparency and explainability.
 
-This project investigates whether Large Language Models (LLMs) combined with retrieval techniques can assist—not replace—compliance professionals by accelerating these workflows while maintaining transparency and explainability.
+## Research Question
 
----
-
-# Research Question
-
-**Can an AI-assisted system automatically extract regulatory obligations, compare them against enterprise policies, and generate explainable compliance gap reports?**
+**Can an AI-assisted system extract regulatory obligations, compare them against enterprise policies, and generate explainable compliance gap reports?**
 
 ---
 
-# Scope (Current Phase)
+## Current Implementation
 
-The current implementation focuses on:
+The backend foundation is operational, with PDF upload, text extraction, OCR for scanned documents, and document-processing APIs implemented and tested.
 
-- Uploading regulatory documents
-- Uploading enterprise policy documents
-- Extracting structured compliance obligations
-- Extracting internal policy controls
-- Comparing both documents
-- Identifying compliance gaps
-- Producing explainable reports with source references
+### Implemented Features
 
-The project intentionally avoids autonomous decision-making.
+- FastAPI backend with CORS configuration for the frontend
+- Interactive API documentation through Swagger UI
+- PDF upload with UUID-based document identifiers
+- Local PDF storage in the backend uploads directory
+- Text extraction from digital PDFs using `pypdf`
+- OCR for scanned PDF pages using Tesseract OCR
+- PDF page rendering using PyMuPDF
+- Document-processing endpoint with generated analysis IDs
+- Analysis result retrieval endpoint
+- Health-check endpoint
 
-The final compliance decision always remains with human reviewers.
+### Backend API
 
----
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health/` | Check backend availability |
+| POST | `/upload/` | Upload a PDF document |
+| POST | `/analysis/` | Process an uploaded document |
+| GET | `/analysis/{analysis_id}` | Retrieve processing results |
 
-# High-Level Workflow
+**API documentation:** Available locally at `http://127.0.0.1:8000/docs` when the backend is running.
+
+### Current Processing Workflow
 
 ```text
-Regulation PDF
-        │
-        ▼
-Document Parsing
-        │
-        ▼
-Obligation Extraction
-        │
-        ▼
-Structured Knowledge
-        │
-        ▼
-Policy Comparison
-        │
-        ▼
-Gap Analysis
-        │
-        ▼
-Explainable Compliance Report
+PDF Upload
+    |
+    v
+Local Document Storage
+    |
+    v
+PDF Text Extraction
+    |
+    +---- Digital PDF ----> pypdf
+    |
+    +---- Scanned PDF ----> Tesseract OCR
+                               ^
+                               |
+                            PyMuPDF
+    |
+    v
+Extracted Text and Metadata
+    |
+    v
+Analysis ID Generation
+    |
+    v
+Analysis Result Retrieval
 ```
 
----
-
-# Long-Term Vision
-
-The Compliance Engine represents the first building block of a broader Enterprise AI Governance platform.
-
-Future research modules may include:
-
-- Runtime policy enforcement
-- AI authorization layer
-- AI audit logging
-- Human approval workflows
-- AI activity monitoring
-- AI risk scoring
-- Runtime governance for AI agents
-- Explainable AI governance
-- Enterprise policy engine
+**Current limitation:** The analysis endpoint currently processes documents and returns extraction statistics. Automated regulation-versus-policy comparison and compliance gap detection are not implemented yet. Analysis results are stored in memory and are lost when the backend restarts.
 
 ---
 
-# Planned Technology Stack
+## Technology Stack
 
-## Backend
-
+### Backend
 - Python
 - FastAPI
+- Uvicorn
+- Pydantic
+- `pypdf`
+- PyMuPDF
+- Tesseract OCR
+- `pytesseract`
+- Pillow
 
-## Frontend
-
+### Frontend
 - React
-- Next.js
-- Tailwind CSS
+- Vite
+- Tailwind CSS (planned/integration dependent)
 
-## Database
+### Database
+- PostgreSQL (planned)
 
-- PostgreSQL
-
-## AI Components
-
-- OpenAI API (initial prototype)
+### AI Components
+- OpenAI API
 - Sentence Transformers
 - Retrieval-Augmented Generation (RAG)
 
-## Vector Database
+### Vector Database
+- Chroma (initial prototype)
+- Qdrant (future consideration)
 
-- Chroma (initial)
-- Qdrant (future)
-
-## Infrastructure
-
+### Infrastructure
 - Docker
 
 ---
 
-# Current Roadmap
+## High-Level Target Workflow
 
-## Phase 1
+```text
+Regulation PDF
+       |
+       v
+Document Parsing and OCR
+       |
+       v
+Regulatory Obligation Extraction
+       |
+       v
+Structured Requirements
+       |
+       +----------------------+
+                              |
+                              v
+Company Policy PDF ---> Policy Control Extraction
+                              |
+                              v
+                       Policy Comparison
+                              |
+                              v
+                         Gap Analysis
+                              |
+                              v
+                  Explainable Compliance Report
+```
 
-- [ ] Repository setup
-- [ ] FastAPI backend
-- [ ] React frontend
+---
+
+## Roadmap
+
+### Phase 1: Backend and Document Ingestion
+- [x] Repository setup
+- [x] FastAPI backend
+- [x] React/Vite frontend setup
+- [x] PDF upload endpoint
+- [x] PDF text extraction
+- [x] OCR for scanned PDFs
+- [x] Document-processing API
+- [x] Analysis result retrieval
+- [x] Health-check endpoint
 - [ ] PostgreSQL integration
-- [ ] PDF upload
+- [ ] Persistent analysis storage
 
-## Phase 2
-
-- [ ] Document parsing
+### Phase 2: Document Processing and Retrieval
+- [ ] Document normalization and validation
 - [ ] Text chunking
 - [ ] Embedding generation
 - [ ] Vector search
+- [ ] Source and page-level references
 
-## Phase 3
+### Phase 3: Structured Extraction
+- [ ] Regulatory obligation extraction
+- [ ] Internal policy control extraction
+- [ ] Structured outputs and validation
+- [ ] Extraction quality evaluation
 
-- [ ] Obligation extraction
-- [ ] Policy extraction
-- [ ] Structured outputs
+### Phase 4: Compliance Gap Analysis
+- [ ] Regulation-to-policy comparison
+- [ ] Covered, partially covered, and missing classifications
+- [ ] Evidence-backed findings
+- [ ] Risk and confidence scoring
+- [ ] Explainable compliance reports
 
-## Phase 4
-
-- [ ] Compliance gap analysis
-- [ ] Explainable reports
-- [ ] Confidence scoring
-
-## Phase 5
-
-- [ ] Authentication
-- [ ] Audit logging
+### Phase 5: Enterprise Capabilities
+- [ ] Authentication and authorization
 - [ ] Role-based access control
+- [ ] Audit logging
 - [ ] Document versioning
+- [ ] Human review workflows
+- [ ] Secure document storage
+
+### Phase 6: Broader AI Governance Research
+- [ ] Runtime policy enforcement
+- [ ] AI authorization layer
+- [ ] AI activity monitoring
+- [ ] AI risk assessment
+- [ ] Governance for autonomous AI agents
 
 ---
 
-# Status
+## Long-Term Vision
 
-🚧 Early Research & Development
+The Compliance Engine is the first building block of a broader Enterprise AI Governance platform.
 
-This project is under active development as a long-term learning and research initiative focused on enterprise AI architecture, governance, and compliance.
+Future research may explore:
 
-The architecture and implementation are expected to evolve significantly as new research, industry practices, and enterprise requirements emerge.
+- Runtime governance and policy enforcement
+- Authorization controls for AI agents
+- AI activity and audit logging
+- Human approval workflows
+- AI risk scoring and monitoring
+- Explainable AI governance
+
+The long-term objective is to investigate how enterprise AI systems can operate within explicit, auditable, and enforceable governance boundaries.
 
 ---
 
-# License
+## Project Status
+
+🚧 **Early Research & Development**
+
+The backend document-ingestion foundation is implemented and tested. The next milestone is to build the regulation-versus-policy comparison engine, followed by persistent storage, retrieval, and explainable reporting.
+
+This is an evolving research and learning project. Architecture and implementation will change as the project develops and requirements become clearer.
+
+---
+
+## License
 
 MIT License
